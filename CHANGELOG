@@ -1,2 +1,5 @@
+1.0.1
+- Train Lstm variations for closing price prediction
+
 1.0.0
 - Initializare structura proiect si preprocesare date

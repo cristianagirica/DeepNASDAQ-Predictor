@@ -3,7 +3,7 @@ import glob
 import pandas as pd
 
 companii_tinta = {"AAL", "JBLU", "SNCY", "UAL", "RJET"}
-cale_baza = "../dataIn"
+cale_baza = "./dataIn"
 
 toate_datele = []
 
@@ -27,4 +27,5 @@ for folder in sorted(foldere_anuale):
 
 if toate_datele:
     df_final = pd.concat(toate_datele, ignore_index=True)
-    df_final.to_csv("../dataIn/NASDAQ_companii_aeriene_2001-2026.csv", index=False)
+    df_final.to_csv("../regresiePretInchidere/dataIn/NASDAQ_companii_aeriene_2001-2026.csv", index=False)
+    df_final.to_csv("../regresiePragPret/dataIn/NASDAQ_companii_aeriene_2001-2026.csv", index=False)
