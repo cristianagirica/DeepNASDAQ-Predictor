@@ -25,7 +25,7 @@ Combustibilul reprezintă cea mai mare cheltuială operațională din aviație (
 
 ## Structura Directorului
 * `regresie/dataIn` — Setul de date procesat final de intrare.
-* `regresie/dataOut` — Setul de date de ieșire, cu predicțiile generate de modelele LSTM ce apar dupa rularea pasilor din src, plot-uri, prognoza etc.
+* `regresie/dataOut` — Setul de date de ieșire, cu predicțiile generate de modelele LSTM ce apar după rularea pasilor din src, plot-uri, prognoza etc.
 * `regresie/src` — Codul sursă Python ce implementează modelele LSTM, precum și funcțiile de inginerie a datelor, impartit in pasi logici.
 * `regresie/model` - Directorul ce conține modelele LSTM salvate după antrenare.
 * `docs/` — Documentul MS Word ce conține justificarea economică, metodologia teoretică și interpretarea rezultatelor.
