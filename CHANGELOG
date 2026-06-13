@@ -1,3 +1,6 @@
+1.0.2
+- Improved LSTM model performance and data engineering
+
 1.0.1
 - Train Lstm variations for closing price prediction
 

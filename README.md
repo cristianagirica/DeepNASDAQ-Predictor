@@ -21,11 +21,11 @@ Combustibilul reprezintă cea mai mare cheltuială operațională din aviație (
 2. **Decuplarea performanței:** Modul în care criza afectează diferențiat giganții internaționali (`UAL`, `AAL`) față de operatorii regionali sau de nișă (`JBLU`, `SNCY`, `RJET`).
 
 ## Obiectivele Tehnice ale Predicției
-1. **Predicție de tip continuu (Regresie):** Estimarea prețului de închidere (`Close`) pentru secvențe de 5, 10 sau 20 de zile în viitor.
-2. **Predicție de tip categorial (Clasificare):** Anticiparea direcției trendului pieței de la o zi la alta (1 pentru creștere, -1 pentru descreștere).
+**Predicție de tip continuu (Regresie):** Estimarea prețului de închidere (`Close`) pentru secvențe de 5, 10 sau 20 de zile în viitor.
 
 ## Structura Directorului
-* `src/` — Scripturile Python pentru preprocesare (`data_preprocessing.py`), arhitectura rețelei (`model_lstm.py`), antrenare și evaluare.
-* `dataIn/` — Locația unde se află fișierele CSV brute, organizate cronologic dar și setul de date procesat pentru cele 5 companii aeriene.
-* `plots/` — Graficele generate din cod.
+* `regresie/dataIn` — Setul de date procesat final de intrare.
+* `regresie/dataOut` — Setul de date de ieșire, cu predicțiile generate de modelele LSTM ce apar dupa rularea pasilor din src, plot-uri, prognoza etc.
+* `regresie/src` — Codul sursă Python ce implementează modelele LSTM, precum și funcțiile de inginerie a datelor, impartit in pasi logici.
+* `regresie/model` - Directorul ce conține modelele LSTM salvate după antrenare.
 * `docs/` — Documentul MS Word ce conține justificarea economică, metodologia teoretică și interpretarea rezultatelor.

@@ -27,5 +27,5 @@ for folder in sorted(foldere_anuale):
 
 if toate_datele:
     df_final = pd.concat(toate_datele, ignore_index=True)
-    df_final.to_csv("../regresiePretInchidere/dataIn/NASDAQ_companii_aeriene_2001-2026.csv", index=False)
+    df_final.to_csv("../regresie/dataIn/NASDAQ_companii_aeriene_2001-2026.csv", index=False)
     df_final.to_csv("../regresiePragPret/dataIn/NASDAQ_companii_aeriene_2001-2026.csv", index=False)
