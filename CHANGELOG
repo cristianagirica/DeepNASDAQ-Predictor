@@ -1,3 +1,6 @@
+1.0.3
+- Implementarea propriei clase de retele neuronale si testarea celor 3 modele
+
 1.0.2
 - Improved LSTM model performance and data engineering
 

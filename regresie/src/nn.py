@@ -1,27 +1,26 @@
+import os
 import numpy as np
 import tensorflow as tf
-import os
 import matplotlib.pyplot as plt
+
 
 class ModelTrainer:
 
-    def __init__(self, model, loss="mse", optimizer="adam",
+    def __init__(self, model, model_name="final_model", loss="mse", optimizer="adam",
                  patience=10, min_delta=0.0):
-
         self.model = model
+        self.model_name = model_name
         self.loss_fn = loss
         self.optimizer = optimizer
 
         self.train_losses = []
         self.val_losses = []
 
-        # BEST MODEL TRACKING
         self.best_val_loss = np.inf
         self.best_weights = None
         self.best_epoch = 0
         self.epoch_counter = 0
 
-        # 🔥 EARLY STOPPING SETTINGS
         self.patience = patience
         self.min_delta = min_delta
         self.wait = 0
@@ -53,12 +52,10 @@ class ModelTrainer:
             train_losses = []
             val_losses = []
 
-            # TRAIN
             for x_batch, y_batch in train_ds:
                 loss = self.train_step(x_batch, y_batch)
                 train_losses.append(loss)
 
-            # VAL
             for x_batch, y_batch in val_ds:
                 loss = self.val_step(x_batch, y_batch)
                 val_losses.append(loss)
@@ -69,37 +66,43 @@ class ModelTrainer:
             self.train_losses.append(train_loss)
             self.val_losses.append(val_loss)
 
-            print(f"Epoch {epoch+1}/{epochs} | Train Loss: {train_loss:.5f} | Val Loss: {val_loss:.5f}")
+            print(f"Epoch {epoch + 1}/{epochs} | Train Loss: {train_loss:.5f} | Val Loss: {val_loss:.5f}")
 
-            # -----------------------
-            # BEST MODEL SAVE
-            # -----------------------
             if val_loss < self.best_val_loss - self.min_delta:
                 self.best_val_loss = val_loss
                 self.best_weights = self.model.get_weights()
                 self.best_epoch = self.epoch_counter
                 self.wait = 0
 
-                os.makedirs("../model", exist_ok=True)
-                self.model.save("../model/best_model.keras")
+                util_dir = "../util"
+                os.makedirs(util_dir, exist_ok=True)
+
+                nume_fisier_best = f"{self.model_name}_best.keras"
+                self.model.save(os.path.join(util_dir, nume_fisier_best))
 
             else:
                 self.wait += 1
 
-            # -----------------------
-            # EARLY STOPPING
-            # -----------------------
             if self.wait >= self.patience:
-                print(f"\n🛑 Early stopping at epoch {epoch+1}")
+                print(f"\n🛑 Early stopping at epoch {epoch + 1}")
                 print(f"Best epoch was {self.best_epoch} with val_loss={self.best_val_loss:.6f}")
                 break
 
     def predict(self, X):
         return self.model(X, training=False).numpy()
 
-    def save(self, path):
+    def save(self, path=None):
+        if path is None:
+            path = f"../model/{self.model_name}.keras"
+        elif os.path.isdir(path):
+            path = os.path.join(path, f"{self.model_name}.keras")
+        elif not path.endswith(".keras"):
+            os.makedirs(path, exist_ok=True)
+            path = os.path.join(path, f"{self.model_name}.keras")
+
         os.makedirs(os.path.dirname(path), exist_ok=True)
         self.model.save(path)
+        print(f"Model saved successfully at: {path}")
 
     def load(self, path):
         self.model = tf.keras.models.load_model(path)
@@ -108,14 +111,11 @@ class ModelTrainer:
         if self.best_weights is not None:
             self.model.set_weights(self.best_weights)
 
-    # -----------------------
-    # PLOT LOSS
-    # -----------------------
     def save_loss_plot(self, path="../dataOut/plot/loss.png"):
 
         os.makedirs(os.path.dirname(path), exist_ok=True)
 
-        plt.figure(figsize=(10,5))
+        plt.figure(figsize=(10, 5))
         plt.plot(self.train_losses, label="Train Loss")
         plt.plot(self.val_losses, label="Val Loss")
 

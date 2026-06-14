@@ -1,75 +1,78 @@
-# -*- coding: utf-8 -*-
-"""
-ANTRENARE MODEL: LSTM
-Modificat pentru a prelua seturile gata împărțite cronologic la Pasul 2,
-asigurând că modelul învață din toate cele 5 companii aeriene.
-"""
-
 import numpy as np
+import tensorflow as tf
 import os
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, Dense, Dropout
-from tensorflow.keras.callbacks import EarlyStopping
+import matplotlib.pyplot as plt
+import joblib
+import pandas as pd
 
-# --- MODIFICARE CRITICĂ: Încărcăm direct fișierele de Train și Test generate la Pasul 2 ---
+from nn import ModelTrainer
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+
 X_train = np.load("../dataIn/train/X_train.npy")
 y_train = np.load("../dataIn/train/y_train.npy")
+
 X_test = np.load("../dataIn/train/X_test.npy")
 y_test = np.load("../dataIn/train/y_test.npy")
 
-# Liniile vechi cu "split = int(len(X) * 0.8)" AU FOST ȘTERSE, deoarece datele vin deja separate!
+scaler_y = joblib.load("../util/scaler_y.pkl")
 
-# Verificare în consolă pentru a te asigura că dimensiunile sunt corecte
-print(f"Date încărcate pentru antrenare LSTM:")
-print(f"X_train shape: {X_train.shape} | y_train shape: {y_train.shape}")
-print(f"X_test shape: {X_test.shape} | y_test shape: {y_test.shape}")
+model = tf.keras.Sequential([
+    tf.keras.layers.LSTM(128, return_sequences=True,
+                         input_shape=(X_train.shape[1], X_train.shape[2])),
+    tf.keras.layers.Dropout(0.2),
 
-# Structura rețelei rămâne neschimbată, dar input_shape va citi din noul X_train
-model = Sequential()
+    tf.keras.layers.LSTM(64),
+    tf.keras.layers.Dropout(0.2),
 
-model.add(
-    LSTM(
-        128,
-        return_sequences=True,
-        input_shape=(X_train.shape[1], X_train.shape[2]) # Citim din X_train
-    )
+    tf.keras.layers.Dense(32, activation="relu"),
+    tf.keras.layers.Dense(1)
+])
+
+trainer = ModelTrainer(
+    model=model,
+    model_name="lstm_model",
+    optimizer=tf.keras.optimizers.Adam(learning_rate=0.0005)
 )
 
-model.add(Dropout(0.2))
-
-model.add(LSTM(64))
-
-model.add(Dropout(0.2))
-
-model.add(Dense(32, activation="relu"))
-
-model.add(Dense(1))
-
-model.compile(
-    optimizer="adam",
-    loss="mse",
-    metrics=["mae"]
+trainer.fit(
+    X_train, y_train,
+    X_test, y_test,
+    epochs=50,
+    batch_size=64
 )
 
-early_stop = EarlyStopping(
-    patience=10,
-    restore_best_weights=True
-)
+trainer.restore_best_weights()
 
-# Directorul pentru salvarea modelului
-os.makedirs("../model/", exist_ok=True)
+y_pred = trainer.predict(X_test)
 
-# Antrenarea modelului
-history = model.fit(
-    X_train,
-    y_train,
-    epochs=100,
-    batch_size=64,
-    # Folosim X_test și y_test direct ca date de validare în loc de validation_split.
-    # Este mult mai corect academic deoarece validezi pe ultima perioadă din toate companiile!
-    validation_data=(X_test, y_test),
-    callbacks=[early_stop]
-)
+y_pred_real = scaler_y.inverse_transform(y_pred)
+y_test_real = scaler_y.inverse_transform(y_test)
 
-model.save("../model/lstm_model.keras")
-print("Modelul LSTM a fost salvat cu succes în '../model/lstm_model.keras'")
+print("\n===== RESULTS (REAL SCALE) =====")
+print("MAE:", mean_absolute_error(y_test_real, y_pred_real))
+print("RMSE:", np.sqrt(mean_squared_error(y_test_real, y_pred_real)))
+print("R2:", r2_score(y_test_real, y_pred_real))
+
+os.makedirs("../dataOut", exist_ok=True)
+
+df_out = pd.DataFrame({
+    "Actual": y_test_real.flatten(),
+    "Predicted": y_pred_real.flatten()
+})
+
+df_out.to_csv("../dataOut/lstm_predictions_real.csv", index=False)
+
+os.makedirs("../dataOut/plot", exist_ok=True)
+
+plt.figure(figsize=(12,5))
+plt.plot(y_test_real, label="Actual")
+plt.plot(y_pred_real, label="Predicted")
+plt.title("Actual vs Predicted (Real Scale)")
+plt.legend()
+
+plt.savefig("../dataOut/plot/lstm_predictions_real.png")
+plt.close()
+
+trainer.save_loss_plot("../dataOut/plot/lstm_loss_curve.png")
+
+trainer.save()

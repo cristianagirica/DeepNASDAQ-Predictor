@@ -1,13 +1,16 @@
 import os
 import numpy as np
 import pandas as pd
+import joblib
 from sklearn.preprocessing import MinMaxScaler
 
 LOOKBACK = 30
 CALE_FEATURES = "../dataIn/features.csv"
 DIRECTOR_IEȘIRE = "../dataIn/train/"
+DIRECTOR_MODELE = "../util/"
 
 os.makedirs(DIRECTOR_IEȘIRE, exist_ok=True)
+os.makedirs(DIRECTOR_MODELE, exist_ok=True)
 
 df = pd.read_csv(CALE_FEATURES)
 
@@ -44,6 +47,9 @@ for symbol, group in df.groupby("Symbol"):
     y_train_scaled = scaler_y.fit_transform(y_comp_train)
     y_test_scaled = scaler_y.transform(y_comp_test)
 
+    joblib.dump(scaler_x, os.path.join(DIRECTOR_MODELE, f"scaler_x.pkl"))
+    joblib.dump(scaler_y, os.path.join(DIRECTOR_MODELE, f"scaler_y.pkl"))
+
     for i in range(LOOKBACK, len(X_train_scaled)):
         X_train_total.append(X_train_scaled[i - LOOKBACK:i])
         y_train_total.append(y_train_scaled[i])
@@ -66,6 +72,6 @@ np.save(os.path.join(DIRECTOR_IEȘIRE, "X_test.npy"), X_test)
 np.save(os.path.join(DIRECTOR_IEȘIRE, "y_test.npy"), y_test)
 
 print("--- Pregătire date finalizată cu succes! ---")
+print(f"Scalerele au fost exportate în '{DIRECTOR_MODELE}'")
 print(f"Set Antrenare (Train) - X: {X_train.shape}, y: {y_train.shape}")
 print(f"Set Testare (Test)    - X: {X_test.shape},  y: {y_test.shape}")
-print("Fiecare dintre cele 5 companii are exact 20% din perioada sa recentă în setul de test.")
