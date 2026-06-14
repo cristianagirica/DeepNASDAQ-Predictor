@@ -79,6 +79,9 @@ DeepNASDAQ-Predictor/
 │       ├── lstm_loss_curve.png         # Curbele de eroare (Train vs Val Loss) per model
 │       ├── bilstm_loss_curve.png
 │       └── cnn_lstm_loss_curve.png
+│ 
+└── preprocesare/                       
+│   └── preprocesare.py  # Structurarea si filtrarea seturilor de date initiale in setul de date final dorit
 │
 └── docs/                               # Documentația oficială a proiectului academic
     └── Proiect_Retele_Neuronale_Echipa.docx  # Justificare economică, metodologie și interpretarea metricilor

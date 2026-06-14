@@ -1,5 +1,4 @@
 /.venv/
-/preprocesare/
 /regresie/dataIn/train/
 /regresie/dataIn/features.csv
 /regresie/dataOut/
